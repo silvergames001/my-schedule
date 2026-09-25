@@ -55,6 +55,7 @@ codes 배열은 반드시 days와 같은 순서(월~일)로 7칸이어야 하고
     const data = await geminiRes.json();
 
     if (!geminiRes.ok) {
+      console.error('GEMINI ERROR:', geminiRes.status, JSON.stringify(data));
       const status = geminiRes.status === 400 ? 401 : geminiRes.status;
       return res.status(status).json(data);
     }
