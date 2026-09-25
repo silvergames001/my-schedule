@@ -26,7 +26,7 @@ export default async function handler(req, res) {
 }
 codes 배열은 반드시 days와 같은 순서(월~일)로 7칸이어야 하고, 코드가 없는 칸은 빈 문자열("")로 채워줘.`;
 
-  const GEMINI_MODEL = 'gemini-3.5-flash-lite';
+  const GEMINI_MODEL = 'gemini-flash-lite-latest';
 
   try {
     const geminiRes = await fetch(
