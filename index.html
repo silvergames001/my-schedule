@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fbfbfb">
+<title>개별지도 시간표 조회</title>
+<style>
+:root {
+  --bg-main: #fbfbfb; --card: #ffffff; --line: #e5e8eb; --gray-fill: #f3f4f6;
+  --ink: #333d4b; --muted: #8b95a1;
+  --blue-main: #3182f6; --blue-light: #c9e4ff;
+  --error: #f04452; --error-bg: #fed6d6;
+  --yellow: #ffe58a; --purple: #e3ddfb;
+  --toss-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --toss-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --toss-sheet: cubic-bezier(0.65, 0, 0, 1);
+  --press-in: 0.13s cubic-bezier(0.3, 0.7, 0.25, 1);
+  --press-out: 0.42s cubic-bezier(0.2, 1.32, 0.4, 1);
+  --slide: 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+  --panel: 0.52s cubic-bezier(0.25, 0.7, 0.2, 1);
+  --press-scale-sm: 0.88; --press-scale-lg: 0.95;
+}
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    --press-in: 0.2s linear(0, 0.0236, 0.0821, 0.1611, 0.25, 0.3416, 0.4308, 0.5146, 0.5911, 0.6594, 0.7194, 0.7712, 0.8153, 0.8525, 0.8835, 0.909, 0.9297, 0.9465, 0.9599, 0.9705, 0.9787, 0.9851, 0.9899, 0.9935, 0.9962, 0.9981, 0.9995, 1.0004, 1.001, 1.0013, 1.0015, 1.0015, 1.0015, 1.0014, 1);
+    --press-out: 0.62s linear(0, 0.0244, 0.0894, 0.1832, 0.2954, 0.4168, 0.5397, 0.658, 0.7672, 0.864, 0.9467, 1.0142, 1.0667, 1.1048, 1.13, 1.1437, 1.1477, 1.1439, 1.1342, 1.1203, 1.1037, 1.0857, 1.0676, 1.0501, 1.034, 1.0198, 1.0076, 0.9977, 0.99, 0.9844, 0.9807, 0.9788, 0.9782, 0.9788, 0.9802, 0.9823, 0.9847, 0.9874, 0.9901, 0.9926, 0.995, 0.9971, 0.9989, 1.0004, 1);
+    --toss-bounce: linear(0, 0.0244, 0.0894, 0.1832, 0.2954, 0.4168, 0.5397, 0.658, 0.7672, 0.864, 0.9467, 1.0142, 1.0667, 1.1048, 1.13, 1.1437, 1.1477, 1.1439, 1.1342, 1.1203, 1.1037, 1.0857, 1.0676, 1.0501, 1.034, 1.0198, 1.0076, 0.9977, 0.99, 0.9844, 0.9807, 0.9788, 0.9782, 0.9788, 0.9802, 0.9823, 0.9847, 0.9874, 0.9901, 0.9926, 0.995, 0.9971, 0.9989, 1.0004, 1);
+    --toss-spring: linear(0, 0.0246, 0.0844, 0.1631, 0.25, 0.338, 0.4226, 0.5012, 0.5727, 0.6363, 0.6923, 0.7409, 0.7828, 0.8187, 0.8491, 0.8748, 0.8964, 0.9145, 0.9296, 0.9421, 0.9525, 0.9611, 0.9682, 0.9741, 0.9788, 0.9828, 0.986, 0.9886, 0.9908, 0.9925, 0.9939, 0.9951, 1);
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent!important;touch-action:manipulation!important;}
+button,input{outline:none;}
+html,body{height:100dvh;overflow:hidden;overscroll-behavior-y:none;}
+body{
+  font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+  background:var(--bg-main); color:var(--ink);
+  display:flex; flex-direction:column; max-width:480px; margin:0 auto;
+  transition:background var(--panel); -webkit-user-select:none; user-select:none;
+}
+body.is-setup{background:var(--card);}
+header{flex-shrink:0;display:flex;align-items:flex-start;justify-content:space-between;
+  padding:max(16px,env(safe-area-inset-top)) 22px 20px; transition:padding var(--panel);
+  position:relative;z-index:10;background:inherit;}
+header::after{content:"";position:absolute;bottom:-20px;left:0;width:100%;height:20px;
+  background:linear-gradient(to bottom,var(--bg-main),rgba(251,251,251,0));pointer-events:none;}
+body.is-setup header::after{background:linear-gradient(to bottom,var(--card),rgba(255,255,255,0));}
+.who-wrap{flex:1;overflow:visible;white-space:nowrap;max-width:300px;opacity:1;transform:translateX(0);
+  transition:all var(--panel);display:flex;align-items:center;gap:11px;}
+body.is-setup .who-wrap{overflow:hidden;max-width:0px;opacity:0;transform:translateY(-24px);padding:0;margin:0;}
+.who-card{flex-shrink:0;line-height:0;}
+.idcard-mini{width:46px;overflow:visible!important;filter:drop-shadow(2px 5px 10px rgba(49,130,246,.28));
+  transform-origin:center;transform:rotate(-5deg);animation:cardFloatMini 4s ease-in-out infinite;}
+@keyframes cardFloatMini{0%,100%{transform:rotate(-5deg) translateY(0);}50%{transform:rotate(-5deg) translateY(-3px);}}
+.idcard-small{width:88px;flex-shrink:0;overflow:visible!important;filter:drop-shadow(4px 12px 24px rgba(49,130,246,.3));
+  transform-origin:center;transform:rotate(-5deg);animation:cardFloat 4s ease-in-out infinite;}
+@keyframes cardFloat{0%,100%{transform:rotate(-5deg) translateY(0);}50%{transform:rotate(-5deg) translateY(-6px);}}
+.cardshine{animation:cardSweep 4.5s ease-in-out infinite;}
+@keyframes cardSweep{0%,60%{transform:translateX(-120px) skewX(-20deg);}85%,100%{transform:translateX(240px) skewX(-20deg);}}
+.who{line-height:1.4;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+.who b,.who span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.who b{font-size:19px;font-weight:700;letter-spacing:-.02em;}
+.who span{font-size:13px;color:var(--muted);font-weight:500;margin-top:3px;}
+.gear{width:36px;height:36px;flex-shrink:0;background:transparent;border:0;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;color:var(--ink);
+  transition:width var(--panel),margin-left var(--panel),opacity var(--panel),padding var(--panel);}
+.gear:active,.gear.pressed{background:rgba(0,0,0,.15);transform:scale(var(--press-scale-sm))!important;
+  transition:transform var(--press-in),background-color var(--press-in)!important;}
+body.is-setup .gear{width:0px;margin-left:0px;transform:scale(.5);opacity:0;padding:0;pointer-events:none;}
+
+.btn-simple,.mgr-item,.mgr-trigger{
+  transition:transform var(--press-out),background-color var(--press-out),border-color var(--press-out),filter var(--press-out)!important;
+}
+.btn-simple:active,.btn-simple.pressed,.mgr-item:active,.mgr-item.pressed,.mgr-trigger:active,.mgr-trigger.pressed{
+  transform:scale(var(--press-scale-lg))!important;filter:brightness(.92)!important;
+  transition:transform var(--press-in),filter var(--press-in),background-color var(--press-in),border-color var(--press-in)!important;
+}
+.view-container{position:relative;flex:1;width:100%;overflow:hidden;background:#000;}
+.view{position:absolute;top:0;left:0;width:100%;height:100%;overflow-y:auto;overflow-x:hidden;
+  padding:22px 22px 24px;display:flex;flex-direction:column;gap:0;background:var(--bg-main);
+  visibility:hidden;pointer-events:none;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;
+  scroll-behavior:smooth;transform:translate3d(100%,0,0);z-index:1;}
+.view.setup{background:var(--card);}
+.view:not(.active) *{animation-play-state:paused!important;}
+.view.active{visibility:visible;pointer-events:auto;transform:translate3d(0,0,0);z-index:5;
+  box-shadow:-12px 0 32px rgba(0,0,0,.12);}
+.view.first-enter>*{animation:fadeInUp .5s var(--toss-spring) backwards;}
+.view.first-enter>*:nth-child(1){animation-delay:.06s;}
+.view.first-enter>*:nth-child(2){animation-delay:.12s;}
+.view.first-enter>*:nth-child(3){animation-delay:.18s;}
+.view.first-enter>*:nth-child(4){animation-delay:.24s;}
+.view.first-enter>*:nth-child(n+5){animation-delay:.28s;}
+@keyframes fadeInUp{0%{opacity:0;transform:translateY(16px);}100%{opacity:1;transform:translateY(0);}}
+
+.setup-header-row{display:flex;align-items:center;gap:18px;margin-bottom:28px;padding-top:8px;}
+.setup-title-col h2{font-size:23px;font-weight:700;letter-spacing:-.02em;margin-bottom:5px;}
+.setup-title-col p{font-size:13.5px;color:var(--muted);font-weight:500;}
+.setup-field{margin-bottom:14px;}
+.label{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:10px;}
+input[type=text]{width:100%;background:var(--gray-fill);border:1px solid transparent;border-radius:14px;
+  padding:17px 16px;font-size:16px;font-family:inherit;color:var(--ink);font-weight:500;
+  transition:border-color .5s ease,background-color .5s ease;}
+input:focus{outline:none;background:var(--card);border-color:var(--blue-main);}
+::placeholder{color:#b0b8c1;font-weight:500;}
+.setup-footer{margin-top:22px;}
+.btn-simple{width:100%;padding:16px;font-size:17px;border-radius:16px;background:var(--blue-main);
+  color:#fff;font-weight:700;border:none;cursor:pointer;font-family:inherit;letter-spacing:-.01em;
+  display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-simple:disabled{opacity:.6;pointer-events:none;}
+
+.mgr-trigger{width:100%;background:var(--gray-fill);border:1px solid transparent;border-radius:14px;
+  padding:16px;font-size:16px;font-family:inherit;color:var(--ink);font-weight:600;cursor:pointer;
+  display:flex;align-items:center;gap:12px;transition:background-color .5s ease,border-color .5s ease;}
+.mgr-trigger .tava{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:600;color:#fff;flex-shrink:0;background:#b0b8c1;overflow:hidden;}
+.mgr-trigger .txt{flex:1;text-align:left;position:relative;overflow:hidden;height:20px;}
+.trigger-text-part{display:block;width:100%;line-height:20px;}
+.mgr-trigger .ph{color:#b0b8c1;font-weight:500;}
+@keyframes rollInUp{0%{transform:translateY(24px) scale(.85);opacity:0;}100%{transform:translateY(0) scale(1);opacity:1;}}
+@keyframes rollOutUp{0%{transform:translateY(0) scale(1);opacity:1;}50%{opacity:0;}100%{transform:translateY(-24px) scale(.85);opacity:0;}}
+.mgr-trigger .arrow{transition:transform .4s var(--toss-bounce);color:var(--muted);font-size:12px;}
+.apikey-note{font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:8px;}
+.apikey-note a{color:var(--blue-main);font-weight:600;}
+
+/* main / capture view */
+.who-target{display:flex;align-items:center;gap:11px;background:var(--gray-fill);border-radius:16px;
+  padding:14px 16px;margin-bottom:20px;}
+.who-target .tava{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:14px;font-weight:700;flex-shrink:0;overflow:hidden;}
+.who-target b{font-size:15.5px;font-weight:700;}
+.who-target span{display:block;font-size:12px;color:var(--muted);margin-top:1px;}
+.hero-card{background:var(--card);border:1.5px solid var(--line);border-radius:20px;padding:30px 22px;
+  text-align:center;margin-bottom:18px;}
+.hero-icon{width:56px;height:56px;border-radius:50%;background:var(--blue-light);display:flex;
+  align-items:center;justify-content:center;margin:0 auto 14px;color:var(--blue-main);}
+.hero-card h3{font-size:17px;font-weight:800;margin-bottom:7px;}
+.hero-card p{font-size:13px;color:var(--muted);line-height:1.55;}
+.again-btn{width:100%;padding:15px;border:0;border-radius:14px;background:var(--gray-fill);
+  color:var(--ink);font-size:14.5px;font-weight:700;margin-top:10px;cursor:pointer;font-family:inherit;}
+.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 10px;gap:18px;}
+.spinner{width:34px;height:34px;border-radius:50%;border:3.5px solid var(--gray-fill);
+  border-top-color:var(--blue-main);animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-wrap p{font-size:14px;color:var(--muted);font-weight:600;}
+.err-box{background:var(--error-bg);color:var(--error);border-radius:14px;padding:16px;
+  font-size:13.5px;font-weight:600;line-height:1.55;margin-bottom:14px;animation:tossShake .4s;}
+@keyframes tossShake{0%,100%{transform:translateX(0);}15%{transform:translateX(-6px);}30%{transform:translateX(6px);}
+  45%{transform:translateX(-4px);}60%{transform:translateX(4px);}75%{transform:translateX(-2px);}}
+
+.tt-wrap{background:var(--card);border:1.5px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:16px;
+  animation:fadeInUp .45s var(--toss-spring) backwards;}
+.tt-name-row{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line);background:var(--gray-fill);}
+.tt-name-row b{font-size:16px;font-weight:800;}
+.tt-name-row span{font-size:12px;color:var(--muted);}
+table.tt{width:100%;border-collapse:collapse;font-size:12.5px;}
+table.tt th{background:var(--blue-main);color:#fff;font-weight:700;padding:9px 4px;font-size:11.5px;}
+table.tt td{padding:9px 3px;text-align:center;border-bottom:1px solid var(--line);border-right:1px solid var(--line);}
+table.tt td:first-child,table.tt th:first-child{text-align:left;padding-left:10px;font-weight:700;}
+table.tt tr td:last-child,table.tt tr th:last-child{border-right:0;}
+.subj{display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--blue-main);flex-shrink:0;}
+.code{display:inline-flex;min-width:22px;height:22px;padding:0 4px;border-radius:6px;background:var(--yellow);
+  align-items:center;justify-content:center;font-weight:800;font-size:12px;}
+.code.sat{background:var(--purple);}
+
+/* bottom sheet (manager picker) */
+.bottom-sheet-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.3);
+  z-index:1100;opacity:0;visibility:hidden;transition:opacity .45s cubic-bezier(.45,0,.55,1),visibility .45s ease;}
+.bottom-sheet-overlay.show{opacity:1;visibility:visible;transition:opacity .32s cubic-bezier(.45,0,.55,1),visibility .32s ease;}
+.bottom-sheet{position:fixed;bottom:max(12px,env(safe-area-inset-bottom));left:11px;width:calc(100% - 22px);
+  max-width:458px;margin:0 auto;right:11px;background:var(--bg-main);border-radius:22px;z-index:1101;
+  padding:32px 18px 21px;opacity:0;transform:translateY(120%) scale(1.05);visibility:hidden;
+  transition:transform .45s cubic-bezier(.3,0,.1,1),opacity .35s ease,visibility .45s ease;
+  display:flex;flex-direction:column;gap:16px;box-shadow:0 12px 40px rgba(0,0,0,.15);}
+.bottom-sheet.show{opacity:1;transform:translateY(0) scale(1);visibility:visible;
+  transition:transform .32s cubic-bezier(.2,.8,.2,1),opacity .2s ease,visibility .32s ease;}
+@supports (-webkit-touch-callout:none){
+  .bottom-sheet{transform:translate3d(0,120%,0) scale(1.05);-webkit-backface-visibility:hidden;backface-visibility:hidden;}
+  .bottom-sheet.show{transform:translate3d(0,0,0) scale(1);}
+}
+.bottom-sheet::before{content:'';position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  width:40px;height:4px;background:#e5e8eb;border-radius:2px;}
+.bs-header{display:flex;justify-content:center;align-items:center;position:relative;margin-bottom:4px;touch-action:none;}
+.bs-header h3{font-size:19px;font-weight:700;color:var(--ink);}
+.mgr-list-wrap{position:relative;display:flex;flex-direction:column;flex:1;margin:-4px -18px 0;padding:4px 18px 0;overflow:hidden;}
+.mgr-list{display:flex;flex-direction:column;gap:6px;padding:4px 0;overflow-y:auto;max-height:calc(60dvh - 130px);
+  -webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;}
+.mgr-item{position:relative;display:flex;align-items:center;gap:12px;background:transparent;border:none;
+  border-radius:16px;padding:13px 14px;font-size:15.5px;font-weight:600;cursor:pointer;text-align:left;
+  color:var(--ink);font-family:inherit;}
+.mgr-item:active,.mgr-item.pressed,.mgr-item.sel:active,.mgr-item.sel.pressed{background:var(--gray-fill);}
+.mgr-item .ava{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:600;color:#fff;flex-shrink:0;overflow:hidden;}
+.mgr-item .nm{flex:1;}
+.mgr-item .check{width:22px;height:22px;border-radius:50%;flex-shrink:0;background:var(--blue-main);color:#fff;
+  display:flex;align-items:center;justify-content:center;transform:scale(0);transition:transform .4s var(--toss-bounce);}
+.mgr-item .check svg{width:13px;height:13px;}
+.mgr-item .check svg polyline{stroke-dasharray:24;stroke-dashoffset:24;}
+.mgr-item.sel .check svg polyline{animation:drawCheck .4s cubic-bezier(.2,0,0,1) forwards;}
+@keyframes drawCheck{100%{stroke-dashoffset:0;}}
+.mgr-item.sel{background:transparent;color:var(--blue-main);}
+.mgr-item.sel .check{transform:scale(1);}
+@keyframes sheetItemFadeIn{0%{opacity:0;transform:translateY(16px);}100%{opacity:1;transform:translateY(0);}}
+.bottom-sheet.show .bs-header{animation:sheetItemFadeIn .4s cubic-bezier(.2,0,0,1) backwards;animation-delay:0s;}
+.bottom-sheet.show .mgr-item{animation:sheetItemFadeIn .4s cubic-bezier(.2,0,0,1) backwards;}
+.bottom-sheet.show .mgr-item:nth-child(1){animation-delay:.03s;}
+.bottom-sheet.show .mgr-item:nth-child(2){animation-delay:.06s;}
+.bottom-sheet.show .mgr-item:nth-child(3){animation-delay:.09s;}
+.bottom-sheet.show .mgr-item:nth-child(4){animation-delay:.12s;}
+.bottom-sheet.show .mgr-item:nth-child(5){animation-delay:.15s;}
+.bottom-sheet.show .mgr-item:nth-child(6){animation-delay:.18s;}
+.bottom-sheet.show .mgr-item:nth-child(7){animation-delay:.21s;}
+.bottom-sheet.show .mgr-item:nth-child(8){animation-delay:.24s;}
+.bottom-sheet.show .mgr-item:nth-child(9){animation-delay:.27s;}
+
+.toast{position:fixed;top:0;left:50%;transform:translate3d(-50%,-100px,0);background:rgba(51,61,75,.9);
+  color:#fff;padding:14px 24px;border-radius:30px;font-size:15px;font-weight:600;z-index:10000;
+  box-shadow:0 8px 16px rgba(0,0,0,.15);white-space:nowrap;pointer-events:none;opacity:0;overflow:hidden;
+  transition:transform var(--panel),opacity .3s;}
+.toast.show{transform:translate3d(-50%,max(24px,env(safe-area-inset-top)),0);opacity:1;}
+#fileInput{display:none;}
+</style>
+</head>
+<body ontouchstart="">
+<div class="toast" id="toastMsg"></div>
+
+<header>
+ <div class="who-wrap">
+  <div class="who-card">
+   <svg class="idcard-mini" viewBox="-6 -6 192 124" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs><linearGradient id="cardBgMini" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#fbfbfb"/></linearGradient>
+    <clipPath id="cardClipMini"><rect x="2" y="2" width="176" height="112" rx="14"/></clipPath></defs>
+    <rect x="2" y="2" width="176" height="112" rx="14" fill="url(#cardBgMini)" stroke="#e5e8eb" stroke-width="2"/>
+    <rect x="2" y="2" width="176" height="32" rx="14" fill="#3182f6" clip-path="url(#cardClipMini)"/>
+    <rect x="2" y="24" width="176" height="10" fill="#3182f6" clip-path="url(#cardClipMini)"/>
+    <rect x="14" y="46" width="26" height="18" rx="4" fill="#c9e4ff" stroke="#9cc9ff" stroke-width="1.5"/>
+    <circle cx="150" cy="64" r="16" fill="#e5e8eb"/><circle cx="150" cy="59" r="5" fill="#8b95a1"/>
+    <path d="M141 72a9 7 0 0 1 18 0" fill="#8b95a1"/>
+    <rect x="14" y="76" width="60" height="6" rx="3" fill="#b0b8c1"/><rect x="14" y="88" width="40" height="4" rx="2" fill="#e5e8eb"/>
+    <g clip-path="url(#cardClipMini)"><rect class="cardshine" x="-30" y="-10" width="50" height="150" fill="#ffffff" opacity=".7" transform="skewX(-20)"/></g>
+   </svg>
+  </div>
+  <div class="who"><b id="whoName">설정 필요</b><span id="whoMgr">이름과 담당매니저를 등록하세요</span></div>
+ </div>
+ <button type="button" class="gear" id="gearBtn" aria-label="다시 설정">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 0 0-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 0 0-2.282.819l-.922 1.597a1.875 1.875 0 0 0 .432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 0 0 0 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 0 0-.432 2.385l.922 1.597a1.875 1.875 0 0 0 2.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 0 0 2.28-.819l.923-1.597a1.875 1.875 0 0 0-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 0 0 0-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 0 0-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 0 0-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 0 0-1.85-1.567h-1.843ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z"/></svg>
+ </button>
+</header>
+
+<main class="view-container">
+ <section class="view setup" id="setupView">
+  <div class="setup-header-row">
+   <svg class="idcard-small" viewBox="-15 -10 210 136" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs><linearGradient id="cardBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#fbfbfb"/></linearGradient>
+    <clipPath id="cardClip"><rect x="2" y="2" width="176" height="112" rx="14"/></clipPath></defs>
+    <rect x="2" y="2" width="176" height="112" rx="14" fill="url(#cardBg)" stroke="#e5e8eb" stroke-width="2"/>
+    <rect x="2" y="2" width="176" height="32" rx="14" fill="#3182f6" clip-path="url(#cardClip)"/>
+    <rect x="2" y="24" width="176" height="10" fill="#3182f6" clip-path="url(#cardClip)"/>
+    <text x="14" y="22" font-size="12" font-weight="700" fill="#ffffff" letter-spacing="1">EPX PASS</text>
+    <rect x="14" y="46" width="26" height="18" rx="4" fill="#c9e4ff" stroke="#9cc9ff" stroke-width="1.5"/>
+    <circle cx="150" cy="64" r="16" fill="#e5e8eb"/><circle cx="150" cy="59" r="5" fill="#8b95a1"/>
+    <path d="M141 72a9 7 0 0 1 18 0" fill="#8b95a1"/>
+    <rect x="14" y="76" width="60" height="6" rx="3" fill="#b0b8c1"/><rect x="14" y="88" width="40" height="4" rx="2" fill="#e5e8eb"/>
+    <g clip-path="url(#cardClip)"><rect class="cardshine" x="-30" y="-10" width="50" height="150" fill="#ffffff" opacity=".7" transform="skewX(-20)"/></g>
+   </svg>
+   <div class="setup-title-col"><h2>내 정보 등록</h2><p>정확히 기재해주세요.</p></div>
+  </div>
+  <div class="setup-field">
+   <div class="label">이름</div>
+   <input type="text" id="setName" placeholder="실명을 입력해주세요" autocomplete="off">
+  </div>
+  <div class="setup-field">
+   <div class="label">담당 매니저</div>
+   <button class="mgr-trigger" id="mgrTrigger" type="button">
+    <span class="tava" id="mgrTriggerAva" style="display:none;">?</span>
+    <span class="txt"><span id="mgrTriggerText" class="ph trigger-text-part">눌러서 선택</span></span>
+    <span class="arrow">▼</span>
+   </button>
+  </div>
+  <div class="setup-footer">
+   <button type="button" class="btn-simple" id="setSave">동의하고 시작하기</button>
+  </div>
+ </section>
+
+ <section class="view" id="mainView">
+  <div class="who-target">
+   <span class="tava" id="mtAva">?</span>
+   <div><b id="mtName">-</b><span id="mtMgr">-</span></div>
+  </div>
+
+  <div id="idleBlock">
+   <div class="hero-card">
+    <div class="hero-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+    <h3>시간표 공지 사진을 촬영해주세요</h3>
+    <p>공지 게시판의 개별지도 시간표 전체가<br>잘 보이도록 촬영하면 내 시간표만 찾아드려요</p>
+   </div>
+   <button type="button" class="btn-simple" id="btnCapture">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    사진 촬영하기
+   </button>
+  </div>
+
+  <div id="loadBlock" style="display:none;">
+   <div class="loading-wrap"><div class="spinner"></div><p id="loadMsg">사진에서 시간표를 찾는 중...</p></div>
+  </div>
+
+  <div id="resultBlock" style="display:none;"></div>
+  <input type="file" id="fileInput" accept="image/*" capture="environment">
+ </section>
+</main>
+
+<div class="bottom-sheet-overlay" id="mgrOverlay"></div>
+<div class="bottom-sheet" id="mgrSheet">
+ <div class="bs-header"><h3>담당 매니저 선택</h3></div>
+ <div class="mgr-list-wrap"><div class="mgr-list" id="mgrList"></div></div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const MANAGERS = ['김소희Ⓜ️','김혜리Ⓜ️','송유진Ⓜ️','엄혜령Ⓜ️','정준환Ⓜ️','김진주Ⓜ️','이명호Ⓜ️','심예지™️','윤현식™️'];
+const AVA_GRADIENT = 'linear-gradient(160deg, #9BA9D6, #7C89C4)';
+const checkSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"></polyline></svg>`;
+function avaChar(name){ const c=(name||'').replace(/[^가-힣a-zA-Z]/g,''); return c?c[0]:'?'; }
+
+const store = { name: localStorage.getItem('tt_name')||'', mgr: localStorage.getItem('tt_mgr')||'' };
+let mgrValue = store.mgr;
+
+/* toast */
+function showToast(msg){
+  const t=$('toastMsg'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(showToast._t); showToast._t=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* view transition (ported from original show()) */
+function show(targetId, isBack){
+  if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  const target = $(targetId);
+  const current = document.querySelector('.view.active');
+  if(current && current !== target){
+    current.classList.add('is-transitioning'); target.classList.add('is-transitioning');
+    current.style.pointerEvents='none'; target.style.pointerEvents='none';
+    current.style.zIndex = isBack?5:1; target.style.zIndex = isBack?1:5;
+    current.style.transition='none'; target.style.transition='none';
+    target.style.visibility='visible'; target.classList.add('active'); target.scrollTo(0,0);
+    if(!isBack){ target.style.transform='translate3d(100%,0,0)'; target.style.opacity='1'; }
+    else { target.style.transform='translate3d(-100%,0,0)'; target.style.opacity='0.8'; }
+    void target.offsetWidth;
+    const dur='0.5s', timing='cubic-bezier(0.65,0,0,1)';
+    const tStr=`transform ${dur} ${timing}, opacity ${dur} ${timing}`;
+    current.style.transition=tStr; target.style.transition=tStr;
+    if(!isBack){ current.style.transform='translate3d(-100%,0,0)'; current.style.opacity='0.8'; target.style.transform='translate3d(0,0,0)'; }
+    else { current.style.transform='translate3d(100%,0,0)'; target.style.transform='translate3d(0,0,0)'; target.style.opacity='1'; }
+    const cleanup=()=>{
+      current.classList.remove('active','is-transitioning'); target.classList.remove('is-transitioning');
+      current.style.visibility='hidden'; current.style.transition=''; current.style.transform=''; current.style.opacity='';
+      target.style.transition=''; target.style.pointerEvents='auto';
+      target.removeEventListener('transitionend', onEnd);
+    };
+    const onEnd=(e)=>{ if(e.target===target && e.propertyName==='transform') cleanup(); };
+    target.addEventListener('transitionend', onEnd);
+    setTimeout(cleanup,550);
+  } else {
+    target.scrollTo(0,0); target.classList.add('active','first-enter');
+    target.style.visibility='visible'; target.style.transform='translate3d(0,0,0)';
+    setTimeout(()=>target.classList.remove('first-enter'),900);
+  }
+  document.body.classList.toggle('is-setup', targetId==='setupView');
+}
+
+function refreshWho(){
+  if(store.name && store.mgr){
+    $('whoName').textContent = store.name;
+    $('whoMgr').textContent = store.mgr.replace(/[Ⓜ️™️]/g,'');
+    $('mtName').textContent = store.name;
+    $('mtMgr').textContent = '담당 매니저 · ' + store.mgr.replace(/[Ⓜ️™️]/g,'');
+    const a=$('mtAva'); a.textContent=avaChar(store.name); a.style.background=AVA_GRADIENT;
+  }
+}
+
+/* manager trigger text roll animation */
+function setTrigger(name){
+  const tt=$('mgrTriggerText'), ava=$('mgrTriggerAva');
+  const newText = name || '눌러서 선택';
+  if(tt.textContent !== newText){
+    const clone=tt.cloneNode(true); clone.removeAttribute('id');
+    clone.style.position='absolute'; clone.style.top='0'; clone.style.left='0'; clone.style.margin='0';
+    clone.style.width='100%'; clone.style.pointerEvents='none';
+    tt.parentNode.appendChild(clone);
+    clone.style.animation='rollOutUp 0.3s ease forwards';
+    setTimeout(()=>clone.remove(),300);
+    tt.textContent=newText;
+    if(name) tt.classList.remove('ph'); else tt.classList.add('ph');
+    tt.style.animation='none'; void tt.offsetWidth; tt.style.animation='rollInUp 0.45s var(--toss-spring) forwards';
+  }
+  if(name){ ava.style.display='flex'; ava.textContent=avaChar(name); ava.style.background=AVA_GRADIENT; }
+  else { ava.style.display='none'; }
+}
+
+/* manager bottom sheet */
+function renderMgrList(){
+  const box=$('mgrList'); box.innerHTML='';
+  MANAGERS.forEach(m=>{
+    const b=document.createElement('button');
+    b.type='button'; b.className='mgr-item'+(m===mgrValue?' sel':'');
+    b.innerHTML=`<span class="ava" style="background:${AVA_GRADIENT}">${avaChar(m)}</span><span class="nm">${m}</span><span class="check">${checkSvg}</span>`;
+    b.onclick=()=>{ mgrValue=m; box.querySelectorAll('.mgr-item').forEach(x=>x.classList.toggle('sel',x===b)); setTrigger(m); setTimeout(closeMgrSheet,200); };
+    box.appendChild(b);
+  });
+}
+function openMgrSheet(){ renderMgrList(); $('mgrOverlay').classList.add('show'); $('mgrSheet').classList.add('show'); }
+function closeMgrSheet(){
+  if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  $('mgrOverlay').classList.remove('show'); $('mgrSheet').classList.remove('show');
+}
+$('mgrTrigger').onclick = openMgrSheet;
+$('mgrOverlay').onclick = closeMgrSheet;
+
+$('setSave').onclick = ()=>{
+  const name = $('setName').value.trim();
+  if(!name){ showToast('이름을 입력해주세요'); return; }
+  if(!mgrValue){ showToast('담당 매니저를 선택해주세요'); return; }
+  store.name=name; store.mgr=mgrValue;
+  localStorage.setItem('tt_name',name); localStorage.setItem('tt_mgr',mgrValue);
+  refreshWho(); resetCapture(); show('mainView', false);
+};
+$('gearBtn').onclick = ()=>{
+  $('setName').value = store.name||''; mgrValue = store.mgr||'';
+  setTrigger(store.mgr||''); show('setupView', true);
+};
+
+/* capture + AI analyze */
+function resetCapture(){
+  $('idleBlock').style.display=''; $('loadBlock').style.display='none';
+  $('resultBlock').style.display='none'; $('resultBlock').innerHTML='';
+}
+$('btnCapture').onclick = ()=> $('fileInput').click();
+
+$('fileInput').addEventListener('change', async (e)=>{
+  const file = e.target.files && e.target.files[0];
+  e.target.value='';
+  if(!file) return;
+  $('idleBlock').style.display='none'; $('resultBlock').style.display='none';
+  $('loadBlock').style.display=''; $('loadMsg').textContent='사진에서 시간표를 찾는 중...';
+  try{
+    const data = await analyzeTimetable(file, store.name);
+    renderResult(data);
+  }catch(err){
+    renderError(err);
+  }finally{
+    $('loadBlock').style.display='none';
+  }
+});
+
+function fileToBase64(file){
+  return new Promise((res, rej)=>{
+    const r = new FileReader();
+    r.onload = ()=> res(r.result.split(',')[1]);
+    r.onerror = ()=> rej(new Error('read_failed'));
+    r.readAsDataURL(file);
+  });
+}
+
+async function analyzeTimetable(file, name){
+  const base64 = await fileToBase64(file);
+  const mediaType = file.type && file.type.startsWith('image/') ? file.type : 'image/jpeg';
+
+  let resp;
+  try{
+    resp = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ image: base64, mediaType, name })
+    });
+  }catch(netErr){
+    throw { code: 'network_error' };
+  }
+
+  if(!resp.ok){
+    if(resp.status === 401) throw { code: 'unauthorized' };
+    if(resp.status === 429) throw { code: 'rate_limited' };
+    throw { code: 'upstream_error' };
+  }
+  const json = await resp.json();
+  const text = (json.content||[]).map(b=>b.text||'').join('\n');
+  const clean = text.replace(/```json|```/g,'').trim();
+  try{
+    return JSON.parse(clean);
+  }catch(parseErr){
+    throw { code: 'invalid_json' };
+  }
+}
+
+function dayLabel(d){ if(!d) return ''; return d.split(' ')[0]||d; }
+function dayDate(d){ if(!d) return ''; return d.split(' ')[1]||''; }
+
+function renderResult(data){
+  const box=$('resultBlock'); box.style.display=''; box.innerHTML='';
+  if(!data || !data.found){
+    const reason=(data && data.notFoundReason) || '사진에서 이름을 찾지 못했어요. 표 전체가 선명하게 나오도록 다시 촬영해주세요.';
+    box.innerHTML = `<div class="err-box">😥 "${store.name}" 님의 시간표를 찾지 못했어요.<br>${reason}</div>
+      <button type="button" class="again-btn" id="btnAgain">다시 촬영하기</button>`;
+    $('btnAgain').onclick = resetCapture;
+    return;
+  }
+  const days = (data.days && data.days.length===7) ? data.days : ['월','화','수','목','금','토','일'];
+  let head = `<tr><th>과목</th>` + days.map(d=>`<th>${dayLabel(d)}<br><span style="opacity:.85;font-weight:500;">${dayDate(d)}</span></th>`).join('') + `</tr>`;
+  let rows = (data.subjects||[]).map(s=>{
+    const codes=(s.codes && s.codes.length===7)?s.codes:['','','','','','',''];
+    const tds = codes.map((c,i)=> `<td>${c?`<span class="code${i===5?' sat':''}">${c}</span>`:''}</td>`).join('');
+    return `<tr><td><span class="subj"><span class="dot"></span>${s.name||''}</span></td>${tds}</tr>`;
+  }).join('');
+  box.innerHTML = `
+    <div class="tt-wrap">
+      <div class="tt-name-row"><b>${data.studentNameOnSheet || store.name}</b>${data.period?`<span>· ${data.period}</span>`:''}</div>
+      <table class="tt">${head}${rows}</table>
+    </div>
+    <button type="button" class="again-btn" id="btnAgain">다시 촬영하기</button>`;
+  $('btnAgain').onclick = resetCapture;
+}
+
+function renderError(err){
+  const box=$('resultBlock'); box.style.display='';
+  let msg='잠시 후 다시 시도해주세요.';
+  const code = err && err.code;
+  if(code==='unauthorized') msg='서버 설정에 문제가 있어요. 관리자에게 문의해주세요.';
+  else if(code==='rate_limited') msg='요청이 많아요. 잠시 후 다시 시도해주세요.';
+  else if(code==='network_error') msg='네트워크 연결을 확인해주세요.';
+  else if(code==='invalid_json') msg='표를 정확히 읽지 못했어요. 표 전체가 잘 보이도록 다시 촬영해주세요.';
+  box.innerHTML = `<div class="err-box">⚠️ 분석에 실패했어요.<br>${msg}</div><button type="button" class="again-btn" id="btnAgain">다시 촬영하기</button>`;
+  $('btnAgain').onclick = resetCapture;
+}
+
+/* press feedback (ported verbatim in behaviour from original) */
+(function initPressFeedback(){
+  const SEL = '.btn-simple, .mgr-item, .mgr-trigger, .gear, .again-btn';
+  let pressedEl=null, pressTime=0, startX=0, startY=0;
+  const release=()=>{
+    if(!pressedEl) return;
+    const el=pressedEl; pressedEl=null;
+    const elapsed=Date.now()-pressTime; const MIN_PRESS=170;
+    const finish=()=>el.classList.remove('pressed');
+    if(elapsed<MIN_PRESS) setTimeout(finish, MIN_PRESS-elapsed); else finish();
+  };
+  const cancel=()=>{ if(pressedEl){ pressedEl.classList.remove('pressed'); pressedEl=null; } };
+  document.addEventListener('touchstart', e=>{
+    const el=e.target.closest(SEL); cancel();
+    if(!el || el.disabled) return;
+    pressedEl=el; pressTime=Date.now();
+    startX=e.touches[0].clientX; startY=e.touches[0].clientY;
+    el.classList.add('pressed');
+  }, {passive:true});
+  document.addEventListener('touchmove', e=>{
+    if(!pressedEl) return;
+    const dx=Math.abs(e.touches[0].clientX-startX), dy=Math.abs(e.touches[0].clientY-startY);
+    if(dx>10||dy>10) cancel();
+  }, {passive:true});
+  document.addEventListener('touchend', release, {passive:true});
+  document.addEventListener('touchcancel', e=>{
+    if(!pressedEl) return;
+    const t=e.changedTouches && e.changedTouches[0];
+    if(t && Math.abs(t.clientX-startX)<=10 && Math.abs(t.clientY-startY)<=10) return;
+    cancel();
+  }, {passive:true});
+})();
+
+/* bottom sheet swipe-to-dismiss (ported from original) */
+(function initBottomSheetDrag(){
+  const sheet = $('mgrSheet');
+  let startY=0, startX=0, currentDeltaY=0, isDragging=false, overlay=null, scrollTarget=null;
+  sheet.addEventListener('touchstart', e=>{
+    scrollTarget = e.target.closest('.mgr-list');
+    if(scrollTarget && scrollTarget.scrollTop>0) return;
+    startY=e.touches[0].clientY; startX=e.touches[0].clientX; isDragging=true; currentDeltaY=0;
+    overlay = $('mgrOverlay');
+    sheet.style.transition='none'; if(overlay) overlay.style.transition='none';
+  }, {passive:true});
+  sheet.addEventListener('touchmove', e=>{
+    if(!isDragging) return;
+    const y=e.touches[0].clientY, x=e.touches[0].clientX;
+    let deltaY=y-startY, deltaX=(x-startX)*0.08;
+    if(scrollTarget && deltaY<0){
+      isDragging=false; sheet.style.transform=''; sheet.style.transition='';
+      if(overlay){ overlay.style.opacity=''; overlay.style.transition=''; }
+      return;
+    }
+    if(e.cancelable && !scrollTarget) e.preventDefault();
+    if(deltaY<0) deltaY*=0.15;
+    currentDeltaY=deltaY;
+    sheet.style.transform=`translate3d(${deltaX}px, ${deltaY}px, 0)`;
+    if(deltaY>0 && overlay){ let op=1-(deltaY/window.innerHeight)*2; if(op<0) op=0; overlay.style.opacity=op; }
+  }, {passive:false});
+  sheet.addEventListener('touchend', ()=>{
+    if(!isDragging) return; isDragging=false;
+    sheet.style.transition=''; sheet.style.transform='';
+    if(overlay){ overlay.style.transition=''; overlay.style.opacity=''; }
+    if(currentDeltaY>90 && overlay) overlay.click();
+  });
+  document.querySelector('.bs-header').addEventListener('touchmove', e=>e.preventDefault(), {passive:false});
+})();
+
+/* launch */
+refreshWho();
+if(store.name && store.mgr){
+  resetCapture();
+  $('mainView').classList.add('active','first-enter');
+  $('mainView').style.visibility='visible'; $('mainView').style.transform='translate3d(0,0,0)';
+  setTimeout(()=>$('mainView').classList.remove('first-enter'),900);
+} else {
+  $('setupView').classList.add('active','first-enter');
+  $('setupView').style.visibility='visible'; $('setupView').style.transform='translate3d(0,0,0)';
+  document.body.classList.add('is-setup');
+  setTimeout(()=>$('setupView').classList.remove('first-enter'),900);
+}
+document.addEventListener('contextmenu', e=>e.preventDefault());
+</script>
+</body>
+</html>
