@@ -52,32 +52,37 @@ body.is-setup .who-wrap{overflow:hidden;max-width:0px;opacity:0;transform:transl
 .idcard-mini{width:46px;overflow:visible!important;filter:drop-shadow(2px 5px 10px rgba(49,130,246,.28));
   transform-origin:center;transform:rotate(-5deg);animation:cardFloatMini 4s ease-in-out infinite;}
 @keyframes cardFloatMini{0%,100%{transform:rotate(-5deg) translateY(0);}50%{transform:rotate(-5deg) translateY(-3px);}}
+.who{line-height:1.4;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+.who b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:19px;font-weight:700;letter-spacing:-.02em;}
+.mgr-line{display:flex;align-items:center;gap:6px;margin-top:4px;overflow:hidden;}
+.mgr-tag{flex-shrink:0;font-size:13px;font-weight:600;color:var(--muted);}
+.mgr-badge{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:700;
+  color:var(--blue-main);background:var(--blue-light);border-radius:8px;padding:3px 9px;letter-spacing:-.01em;}
 .idcard-small{width:88px;flex-shrink:0;overflow:visible!important;filter:drop-shadow(4px 12px 24px rgba(49,130,246,.3));
   transform-origin:center;transform:rotate(-5deg);animation:cardFloat 4s ease-in-out infinite;}
 @keyframes cardFloat{0%,100%{transform:rotate(-5deg) translateY(0);}50%{transform:rotate(-5deg) translateY(-6px);}}
 .cardshine{animation:cardSweep 4.5s ease-in-out infinite;}
 @keyframes cardSweep{0%,60%{transform:translateX(-120px) skewX(-20deg);}85%,100%{transform:translateX(240px) skewX(-20deg);}}
-.who{line-height:1.4;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
-.who b,.who span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.who b{font-size:19px;font-weight:700;letter-spacing:-.02em;}
-.who span{font-size:13px;color:var(--muted);font-weight:500;margin-top:3px;}
-.gear{width:36px;height:36px;flex-shrink:0;background:transparent;border:0;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;color:var(--ink);
-  transition:width var(--panel),margin-left var(--panel),opacity var(--panel),padding var(--panel);}
+.gear{background:transparent;border:none;border-radius:12px;width:42px;height:42px;margin-left:12px;
+  font-size:16px;cursor:pointer;color:var(--ink);display:flex;align-items:center;justify-content:center;
+  transform:scale(1);opacity:1;
+  transition:transform var(--panel),background-color var(--press-out),filter var(--press-out),
+    width var(--panel),margin-left var(--panel),opacity var(--panel),border-width var(--panel),padding var(--panel)!important;}
 .gear:active,.gear.pressed{background:rgba(0,0,0,.15);transform:scale(var(--press-scale-sm))!important;
-  transition:transform var(--press-in),background-color var(--press-in)!important;}
+  transition:transform var(--press-in),filter var(--press-in),background-color var(--press-in),
+    width var(--panel),margin-left var(--panel),opacity var(--panel),border-width var(--panel),padding var(--panel)!important;}
 body.is-setup .gear{width:0px;margin-left:0px;transform:scale(.5);opacity:0;padding:0;pointer-events:none;}
 
-.btn-simple,.btn-outline,.mgr-item,.mgr-trigger{
+.btn-simple,.mgr-item,.mgr-trigger{
   transition:transform var(--press-out),background-color var(--press-out),border-color var(--press-out),filter var(--press-out)!important;
 }
-.btn-simple:active,.btn-simple.pressed,.btn-outline:active,.btn-outline.pressed,.mgr-item:active,.mgr-item.pressed,.mgr-trigger:active,.mgr-trigger.pressed{
+.btn-simple:active,.btn-simple.pressed,.mgr-item:active,.mgr-item.pressed,.mgr-trigger:active,.mgr-trigger.pressed{
   transform:scale(var(--press-scale-lg))!important;filter:brightness(.92)!important;
   transition:transform var(--press-in),filter var(--press-in),background-color var(--press-in),border-color var(--press-in)!important;
 }
 .view-container{position:relative;flex:1;width:100%;overflow:hidden;background:#000;}
 .view{position:absolute;top:0;left:0;width:100%;height:100%;overflow-y:auto;overflow-x:hidden;
-  padding:22px 22px 24px;display:flex;flex-direction:column;gap:0;background:var(--bg-main);
+  padding:22px 22px 0;display:flex;flex-direction:column;gap:0;background:var(--bg-main);
   visibility:hidden;pointer-events:none;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;
   scroll-behavior:smooth;transform:translate3d(100%,0,0);z-index:1;}
 .view.setup{background:var(--card);}
@@ -102,16 +107,25 @@ input[type=text]{width:100%;background:var(--gray-fill);border:1px solid transpa
   transition:border-color .5s ease,background-color .5s ease;}
 input:focus{outline:none;background:var(--card);border-color:var(--blue-main);}
 ::placeholder{color:#b0b8c1;font-weight:500;}
-.setup-footer{margin-top:22px;}
+.setup-footer{margin-top:auto;position:sticky;bottom:0;margin-left:-22px;margin-right:-22px;
+  padding:16px 22px max(24px,env(safe-area-inset-bottom));background:inherit;z-index:100;}
+.setup-footer::before{content:"";position:absolute;top:-28px;left:0;width:100%;height:28px;
+  background:linear-gradient(to top,var(--bg-main),rgba(251,251,251,0));pointer-events:none;}
+.view.setup .setup-footer::before{background:linear-gradient(to top,var(--card),rgba(255,255,255,0));}
 .btn-simple{width:100%;padding:16px;font-size:17px;border-radius:16px;background:var(--blue-main);
   color:#fff;font-weight:700;border:none;cursor:pointer;font-family:inherit;letter-spacing:-.01em;
   display:flex;align-items:center;justify-content:center;gap:8px;}
 .btn-simple:disabled{opacity:.6;pointer-events:none;}
-.btn-outline{width:100%;padding:15px;font-size:16px;border-radius:16px;background:transparent;
-  color:var(--blue-main);font-weight:700;border:1.5px solid var(--blue-light);cursor:pointer;
-  font-family:inherit;letter-spacing:-.01em;display:flex;align-items:center;justify-content:center;
-  gap:8px;margin-top:10px;}
-.btn-outline:disabled{opacity:.6;pointer-events:none;}
+.btn-gray{width:100%;padding:16px;font-size:17px;border-radius:16px;background:#dfe3e8;
+  color:var(--ink);font-weight:700;white-space:nowrap;cursor:pointer;}
+.btn-gray:disabled{opacity:.6;pointer-events:none;}
+#idleBlock{flex:1;min-height:0;display:flex;flex-direction:column;}
+.capture-btn-row{margin-top:auto;position:sticky;bottom:0;display:flex;gap:10px;
+  margin-left:-22px;margin-right:-22px;padding:16px 22px max(24px,env(safe-area-inset-bottom));
+  background:var(--bg-main);z-index:100;}
+.capture-btn-row::before{content:"";position:absolute;top:-28px;left:0;width:100%;height:28px;
+  background:linear-gradient(to top,var(--bg-main),rgba(251,251,251,0));pointer-events:none;}
+.capture-btn-row .btn-simple,.capture-btn-row .btn-gray{flex:1;width:auto;padding-left:10px;padding-right:10px;}
 
 .mgr-trigger{width:100%;background:var(--gray-fill);border:1px solid transparent;border-radius:14px;
   padding:16px;font-size:16px;font-family:inherit;color:var(--ink);font-weight:600;cursor:pointer;
@@ -128,12 +142,6 @@ input:focus{outline:none;background:var(--card);border-color:var(--blue-main);}
 .apikey-note a{color:var(--blue-main);font-weight:600;}
 
 /* main / capture view */
-.who-target{display:flex;align-items:center;gap:11px;background:var(--gray-fill);border-radius:16px;
-  padding:14px 16px;margin-bottom:20px;}
-.who-target .tava{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  color:#fff;font-size:14px;font-weight:700;flex-shrink:0;overflow:hidden;}
-.who-target b{font-size:15.5px;font-weight:700;}
-.who-target span{display:block;font-size:12px;color:var(--muted);margin-top:1px;}
 .hero-card{background:var(--card);border:1.5px solid var(--line);border-radius:20px;padding:30px 22px;
   text-align:center;margin-bottom:18px;}
 .hero-icon{width:56px;height:56px;border-radius:50%;background:var(--blue-light);display:flex;
@@ -245,7 +253,10 @@ table.tt tr td:last-child,table.tt tr th:last-child{border-right:0;}
     <g clip-path="url(#cardClipMini)"><rect class="cardshine" x="-30" y="-10" width="50" height="150" fill="#ffffff" opacity=".7" transform="skewX(-20)"/></g>
    </svg>
   </div>
-  <div class="who"><b id="whoName">설정 필요</b><span id="whoMgr">이름과 담당매니저를 등록하세요</span></div>
+  <div class="who">
+   <b id="whoName">설정 필요</b>
+   <span class="mgr-line"><span class="mgr-tag">담당</span><span id="whoMgr" class="mgr-badge">이름과 담당매니저를 등록하세요</span></span>
+  </div>
  </div>
  <button type="button" class="gear" id="gearBtn" aria-label="다시 설정">
   <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 0 0-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 0 0-2.282.819l-.922 1.597a1.875 1.875 0 0 0 .432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 0 0 0 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 0 0-.432 2.385l.922 1.597a1.875 1.875 0 0 0 2.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 0 0 2.28-.819l.923-1.597a1.875 1.875 0 0 0-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 0 0 0-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 0 0-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 0 0-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 0 0-1.85-1.567h-1.843ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z"/></svg>
@@ -288,25 +299,22 @@ table.tt tr td:last-child,table.tt tr th:last-child{border-right:0;}
  </section>
 
  <section class="view" id="mainView">
-  <div class="who-target">
-   <span class="tava" id="mtAva">?</span>
-   <div><b id="mtName">-</b><span id="mtMgr">-</span></div>
-  </div>
-
   <div id="idleBlock">
    <div class="hero-card">
     <div class="hero-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
     <h3>시간표 공지 사진을 촬영해주세요</h3>
     <p>공지 게시판의 개별지도 시간표 전체가<br>잘 보이도록 촬영하면 내 시간표만 찾아드려요</p>
    </div>
-   <button type="button" class="btn-simple" id="btnCapture">
-    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-    사진 촬영하기
-   </button>
-   <button type="button" class="btn-outline" id="btnGallery">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-    앨범에서 선택하기
-   </button>
+   <div class="capture-btn-row">
+    <button type="button" class="btn-simple" id="btnCapture">
+     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+     사진 촬영하기
+    </button>
+    <button type="button" class="btn-simple btn-gray" id="btnGallery">
+     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+     앨범에서 선택하기
+    </button>
+   </div>
   </div>
 
   <div id="loadBlock" style="display:none;">
@@ -381,9 +389,6 @@ function refreshWho(){
   if(store.name && store.mgr){
     $('whoName').textContent = store.name;
     $('whoMgr').textContent = store.mgr.replace(/[Ⓜ️™️]/g,'');
-    $('mtName').textContent = store.name;
-    $('mtMgr').textContent = '담당 매니저 · ' + store.mgr.replace(/[Ⓜ️™️]/g,'');
-    const a=$('mtAva'); a.textContent=avaChar(store.name); a.style.background=AVA_GRADIENT;
   }
 }
 
@@ -431,7 +436,7 @@ $('setSave').onclick = ()=>{
   if(!mgrValue){ showToast('담당 매니저를 선택해주세요'); return; }
   store.name=name; store.mgr=mgrValue;
   localStorage.setItem('tt_name',name); localStorage.setItem('tt_mgr',mgrValue);
-  refreshWho(); resetCapture(); show('mainView', false);
+  refreshWho(); restoreOrReset(); show('mainView', false);
 };
 $('gearBtn').onclick = ()=>{
   $('setName').value = store.name||''; mgrValue = store.mgr||'';
@@ -443,6 +448,35 @@ function resetCapture(){
   $('idleBlock').style.display=''; $('loadBlock').style.display='none';
   $('resultBlock').style.display='none'; $('resultBlock').innerHTML='';
 }
+
+/* 인식된 시간표를 로컬에 저장해서, 앱을 껐다 켜도(재접속) 다시 촬영할
+   필요 없이 마지막으로 인식된 결과가 그대로 남아있게 한다.
+   (index.html이 이름/매니저 정보와 외출 상태를 저장해두는 것과 동일한 방식) */
+function saveResult(name, data){
+  try{ localStorage.setItem('tt_result', JSON.stringify({ name, data, ts: Date.now() })); }catch(e){}
+}
+function loadResult(){
+  try{
+    const raw = localStorage.getItem('tt_result');
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){ return null; }
+}
+function clearResult(){
+  try{ localStorage.removeItem('tt_result'); }catch(e){}
+}
+
+/* 저장된 결과가 있고 현재 등록된 이름과 일치하면 그 결과를 복원해서 보여주고,
+   없으면 촬영 대기 화면을 보여준다. (launch 시점 / 정보 저장 후 공용으로 사용) */
+function restoreOrReset(){
+  resetCapture();
+  const saved = loadResult();
+  if(saved && saved.name === store.name && saved.data){
+    $('idleBlock').style.display='none';
+    renderResult(saved.data);
+  }
+}
+
 $('btnCapture').onclick = ()=> $('fileInput').click();
 $('btnGallery').onclick = ()=> $('fileInputGallery').click();
 
@@ -452,6 +486,8 @@ async function handleSelectedFile(file){
   $('loadBlock').style.display=''; $('loadMsg').textContent='사진에서 시간표를 찾는 중...';
   try{
     const data = await analyzeTimetable(file, store.name);
+    if(data && data.found) saveResult(store.name, data);
+    else clearResult();
     renderResult(data);
   }catch(err){
     renderError(err);
@@ -481,20 +517,60 @@ function fileToBase64(file){
   });
 }
 
-async function analyzeTimetable(file, name){
-  const base64 = await fileToBase64(file);
-  const mediaType = file.type && file.type.startsWith('image/') ? file.type : 'image/jpeg';
+/* 카메라로 바로 찍은 사진은 보정 없이 수 MB짜리 원본 그대로라
+   느린 네트워크에서는 업로드 도중 끊겨 "네트워크 오류"가 뜨기 쉽다.
+   서버로 보내기 전에 적당한 크기로 줄여서 실패 확률을 낮춘다. */
+function compressImage(file, maxDim, quality){
+  return new Promise((res)=>{
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = ()=>{
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if(width > maxDim || height > maxDim){
+        if(width >= height){ height = Math.round(height * maxDim / width); width = maxDim; }
+        else{ width = Math.round(width * maxDim / height); height = maxDim; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob((blob)=>{
+        if(blob) res(blob); else res(file);
+      }, 'image/jpeg', quality);
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); res(file); };
+    img.src = url;
+  });
+}
+
+async function analyzeTimetable(file, name, isRetry){
+  let uploadFile = file;
+  try{ uploadFile = await compressImage(file, 1600, 0.82); }catch(e){}
+  const base64 = await fileToBase64(uploadFile);
+  const mediaType = 'image/jpeg';
 
   let resp;
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), 30000);
   try{
     resp = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ image: base64, mediaType, name })
+      body: JSON.stringify({ image: base64, mediaType, name }),
+      signal: controller.signal
     });
   }catch(netErr){
+    clearTimeout(timer);
+    /* 일시적인 네트워크 끊김일 수 있으니 한 번만 자동 재시도 */
+    if(!isRetry){
+      await new Promise(r=>setTimeout(r, 800));
+      return analyzeTimetable(file, name, true);
+    }
+    if(netErr && netErr.name === 'AbortError') throw { code: 'timeout' };
     throw { code: 'network_error' };
   }
+  clearTimeout(timer);
 
   if(!resp.ok){
     if(resp.status === 401) throw { code: 'unauthorized' };
@@ -520,7 +596,7 @@ function renderResult(data){
     const reason=(data && data.notFoundReason) || '사진에서 이름을 찾지 못했어요. 표 전체가 선명하게 나오도록 다시 촬영해주세요.';
     box.innerHTML = `<div class="err-box">😥 "${store.name}" 님의 시간표를 찾지 못했어요.<br>${reason}</div>
       <button type="button" class="again-btn" id="btnAgain">다시 촬영하기</button>`;
-    $('btnAgain').onclick = resetCapture;
+    $('btnAgain').onclick = ()=>{ clearResult(); resetCapture(); };
     return;
   }
   const days = (data.days && data.days.length===7) ? data.days : ['월','화','수','목','금','토','일'];
@@ -536,7 +612,7 @@ function renderResult(data){
       <table class="tt">${head}${rows}</table>
     </div>
     <button type="button" class="again-btn" id="btnAgain">다시 촬영하기</button>`;
-  $('btnAgain').onclick = resetCapture;
+  $('btnAgain').onclick = ()=>{ clearResult(); resetCapture(); };
 }
 
 function renderError(err){
@@ -545,10 +621,11 @@ function renderError(err){
   const code = err && err.code;
   if(code==='unauthorized') msg='서버 설정에 문제가 있어요. 관리자에게 문의해주세요.';
   else if(code==='rate_limited') msg='요청이 많아요. 잠시 후 다시 시도해주세요.';
-  else if(code==='network_error') msg='네트워크 연결을 확인해주세요.';
+  else if(code==='network_error') msg='네트워크 연결을 확인한 뒤 다시 시도해주세요.';
+  else if(code==='timeout') msg='서버 응답이 너무 늦어요. 네트워크 상태를 확인한 뒤 다시 시도해주세요.';
   else if(code==='invalid_json') msg='표를 정확히 읽지 못했어요. 표 전체가 잘 보이도록 다시 촬영해주세요.';
   box.innerHTML = `<div class="err-box">⚠️ 분석에 실패했어요.<br>${msg}</div><button type="button" class="again-btn" id="btnAgain">다시 촬영하기</button>`;
-  $('btnAgain').onclick = resetCapture;
+  $('btnAgain').onclick = ()=>{ clearResult(); resetCapture(); };
 }
 
 /* press feedback (ported verbatim in behaviour from original) */
@@ -622,7 +699,7 @@ function renderError(err){
 /* launch */
 refreshWho();
 if(store.name && store.mgr){
-  resetCapture();
+  restoreOrReset();
   $('mainView').classList.add('active','first-enter');
   $('mainView').style.visibility='visible'; $('mainView').style.transform='translate3d(0,0,0)';
   setTimeout(()=>$('mainView').classList.remove('first-enter'),900);
